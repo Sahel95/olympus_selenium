@@ -4,22 +4,33 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import influxdb_client
 import os
 from consts import *
+import pathlib
+
+from datetime import datetime
+myFile = open('/home/sahel/Documents/olympus-discount/append.txt', 'a')
+myFile.write('\n Run at ' + str(datetime.now()))
+myFile.write('\n0')
+
+# cwd = os.getcwd()
+# PATH = cwd + '/chromedriver'
 
 
-
-cwd = os.getcwd()
-PATH = cwd + '/chromedriver'
 
 
 opt = webdriver.ChromeOptions()
-opt.add_extension('./metamask.crx')
+myFile.write('\n0')
+
+opt.add_extension(str(pathlib.Path(__file__).parent.resolve()) +'/metamask.crx')
+myFile.write('\n0')
+
 driver = webdriver.Chrome(chrome_options=opt)
 time.sleep(0.9)
+myFile.write('\n1')
 
 current_window = driver.current_window_handle
 
 chwd = driver.window_handles
-
+myFile.write('\n2')
 for w in chwd:
     if w != current_window:
         driver.switch_to.window(w)
@@ -72,6 +83,8 @@ container_rows = driver.find_elements_by_class_name('bond-grid-data-row')
 client = influxdb_client.InfluxDBClient(url=url, token=token)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 result = []
+myFile.write('5')
+
 for row in container_rows:
     obj = {
         'bond': '',
@@ -89,6 +102,8 @@ for row in container_rows:
     else:
         continue
     result.append(obj)
+    myFile.write("\n" + obj["bond"] + ':' + obj["roi"])
+    print(obj)
     try:
         p = influxdb_client.Point(data[0]).field("discount", float(obj['roi'][:-1]))
         write_api.write(bucket=bucket, org=org, record=p)
